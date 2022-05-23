@@ -14,6 +14,7 @@ async function run(){
     try{
         await client.connect();
         const toolsCollection = client.db('bikes-tools').collection('tools');
+        const itemsCollection = client.db('bikes-tools').collection('items');
         app.get('/tools', async(req, res) => {
             const query = {};
             const cursor = toolsCollection.find(query);
@@ -28,6 +29,12 @@ async function run(){
             res.send(tool);
         })
 
+        app.get('/items', async(req, res) => {
+            const query = {};
+            const cursor = itemsCollection.find(query);
+            const items = await cursor.toArray();
+            res.send(items);
+        })
 
 }
     finally{
