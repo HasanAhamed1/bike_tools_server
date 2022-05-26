@@ -53,6 +53,14 @@ async function run(){
             res.send(tools);
         });
 
+        app.get('/addtool', async(req, res) => {
+          const email = req.params.email;
+          const query = email;
+          const cursor = itemsCollection.find(query);
+          const tool = await cursor.toArray();
+          res.send(tool);
+      })
+
         app.get('/tools/:id', async(req, res) => {
             const id = req.params.id;
             const query = {_id: ObjectId(id)};
@@ -77,7 +85,13 @@ async function run(){
           const user = await usersCollection.findOne({email: email});
           const isAdmin = user.role === 'admin';
           res.send({admin: isAdmin});
-      })
+      });
+
+      app.post('/tools', verifyJWT, verifyAdmin, async(req, res) => {
+        const newProduct = req.body;
+        const result = await toolsCollection.insertOne(newProduct);
+        res.send(result);
+    });
 
         app.put("/users/:email", async (req, res) => {
           const email = req.params.email;
