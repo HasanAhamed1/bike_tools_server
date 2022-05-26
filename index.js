@@ -1,5 +1,5 @@
 const express = require('express');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 require('dotenv').config();
 const jwt = require("jsonwebtoken");
@@ -119,6 +119,14 @@ async function run(){
             const result = await usersCollection.updateOne(filter, updateDoc);
             res.send(result);
         });
+
+        app.delete('/tools/:id', verifyJWT, verifyAdmin, async(req, res) => {
+          const id = req.params.id;
+          const filter = {_id: ObjectId(id)};
+          const result = await toolsCollection.deleteOne(filter);
+          res.send(result);
+      });
+  
     
       
 
