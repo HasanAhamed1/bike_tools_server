@@ -32,6 +32,7 @@ async function run(){
         const toolsCollection = client.db('bikes-tools').collection('tools');
         const itemsCollection = client.db('bikes-tools').collection('items');
         const usersCollection = client.db('bikes-tools').collection('users');
+        const bookingsCollection = client.db('bikes-tools').collection('bookings');
 
         const verifyAdmin = async(req, res, next) =>{
           const requester = req.decoded.email;
@@ -87,10 +88,46 @@ async function run(){
           res.send({admin: isAdmin});
       });
 
+      app.get("/bookings", verifyJWT, async (req, res) => {
+        const customer = req.query.customer;
+        const decodedEmail = req.decoded.email;
+        if (customer === decodedEmail) {
+          const query = { customer: customer };
+          const bookings = await bookingsCollection.find(query).toArray();
+          return res.send(bookings);
+        } else {
+          return res.status(403).send({ message: "forbidden access" });
+        }
+      });
+
+      app.get('/bookings/:id', verifyJWT, async(req, res) =>{
+        const id = req.params.id;
+        const query = {_id: ObjectId(id)};
+        const booking = await bookingsCollection.findOne(query);
+        res.send(booking);
+    });
+
+
       app.post('/tools', verifyJWT, verifyAdmin, async(req, res) => {
         const newProduct = req.body;
         const result = await toolsCollection.insertOne(newProduct);
         res.send(result);
+    });
+
+    app.post("/booking", async (req, res) => {
+      const booking = req.body;
+
+      // const query = { availableQuantity: {$gt: booking.quantity} }
+
+      // const query = {  "$or": [ {"availableQuantity": {$gt: booking.quantity}}, {"minOrderQuantity": {$lt: booking.quantity}} ] }
+
+      // const exists =  bookingsCollection.find(query);
+      // if(exists){
+      //     return res.send({success: false})
+      // }
+      const result = await bookingsCollection.insertOne(booking);
+      res.send(result);
+      // return res.send({success: true, result});
     });
 
         app.put("/users/:email", async (req, res) => {
