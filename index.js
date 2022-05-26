@@ -37,6 +37,7 @@ async function run(){
         const bookingsCollection = client.db('bikes-tools').collection('bookings');
         const reviewCollection = client.db('bikes-tools').collection('review');
         const profileCollection = client.db('bikes-tools').collection('profile');
+        const paymentCollection = client.db('bikes-tools').collection('payments');
 
         const verifyAdmin = async(req, res, next) =>{
           const requester = req.decoded.email;
@@ -199,6 +200,21 @@ async function run(){
             const result = await usersCollection.updateOne(filter, updateDoc);
             res.send(result);
         });
+
+        app.patch('/bookings/:id', verifyJWT, async(req, res) =>{
+          const id = req.params.id;
+          const payment = req.body;
+          const filter = {_id: ObjectId(id)};
+          const updatedDoc ={
+            $set: {
+              paid: true,
+              transactionId: payment.transactionId
+            }
+          }
+          const result = await paymentCollection.insertOne(payment);
+          const updatedBooking = await bookingsCollection.updateOne(filter, updatedDoc);
+          res.send(updatedBooking);
+        })
 
         app.delete('/tools/:id', verifyJWT, verifyAdmin, async(req, res) => {
           const id = req.params.id;
