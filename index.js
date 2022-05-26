@@ -32,6 +32,20 @@ async function run(){
         const toolsCollection = client.db('bikes-tools').collection('tools');
         const itemsCollection = client.db('bikes-tools').collection('items');
         const usersCollection = client.db('bikes-tools').collection('users');
+
+        const verifyAdmin = async(req, res, next) =>{
+          const requester = req.decoded.email;
+        const requesterAccount = await usersCollection.findOne({
+          email: requester,
+        });
+        if (requesterAccount.role === "admin") {
+            next();
+        }
+        else{
+          res.status(403).send({message: 'forbidden'});
+      }
+      }
+
         app.get('/tools', async(req, res) => {
             const query = {};
             const cursor = toolsCollection.find(query);
@@ -80,6 +94,16 @@ async function run(){
           );
           const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET);
           res.send({ result, token });
+        });
+
+        app.put("/users/admin/:email", verifyJWT, async (req, res) => {
+          const email = req.params.email;
+            const filter = { email: email };
+            const updateDoc = {
+              $set: { role: "admin" },
+            };
+            const result = await usersCollection.updateOne(filter, updateDoc);
+            res.send(result);
         });
     
       
