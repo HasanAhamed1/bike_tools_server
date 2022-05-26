@@ -34,6 +34,7 @@ async function run(){
         const usersCollection = client.db('bikes-tools').collection('users');
         const bookingsCollection = client.db('bikes-tools').collection('bookings');
         const reviewCollection = client.db('bikes-tools').collection('review');
+        const profileCollection = client.db('bikes-tools').collection('profile');
 
         const verifyAdmin = async(req, res, next) =>{
           const requester = req.decoded.email;
@@ -116,6 +117,14 @@ async function run(){
       res.send(review);
     });
 
+    app.get('/profile', async(req, res) => {
+      const email = req.params.email;
+      const query = email;
+      const cursor = profileCollection.find(query);
+      const profile = await cursor.toArray();
+      res.send(profile);
+    })
+
 
       app.post('/tools', verifyJWT, verifyAdmin, async(req, res) => {
         const newProduct = req.body;
@@ -142,6 +151,12 @@ async function run(){
     app.post('/review', async(req, res) =>{
       const review = req.body;
       const result = await reviewCollection.insertOne(review);
+      res.send(result);
+    });
+
+    app.post('/profile', async(req, res) =>{
+      const profile = req.body;
+      const result = await profileCollection.insertOne(profile);
       res.send(result);
     });
 
