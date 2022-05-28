@@ -62,48 +62,55 @@ async function run(){
         });
         res.send({clientSecret: paymentIntent.client_secret})
       });
-
-        app.get('/tools', async(req, res) => {
-            const query = {};
-            const cursor = toolsCollection.find(query);
-            const tools = await cursor.toArray();
-            res.send(tools);
-        });
-
-        app.get('/addtool', async(req, res) => {
+  
+      app.get("/tools", async (req, res) => {
+        const query = {};
+        const cursor = toolsCollection.find(query);
+        const tools = await cursor.toArray();
+        res.send(tools);
+      });
+  
+      app.get('/addtool', async(req, res) => {
           const email = req.params.email;
           const query = email;
           const cursor = itemsCollection.find(query);
           const tool = await cursor.toArray();
           res.send(tool);
       })
-
-        app.get('/tools/:id', async(req, res) => {
-            const id = req.params.id;
-            const query = {_id: ObjectId(id)};
-            const tool = await toolsCollection.findOne(query);
-            res.send(tool);
-        });
-
-        app.get('/items', async(req, res) => {
-            const query = {};
-            const cursor = itemsCollection.find(query);
-            const items = await cursor.toArray();
-            res.send(items);
-        });
-
-        app.get("/users", verifyJWT, async (req, res) => {
-            const users = await usersCollection.find().toArray();
-            res.send(users);
-        });
-
-        app.get('/admin/:email', async(req, res) => {
+  
+      app.get("/tools/:id", async (req, res) => {
+        const id = req.params.id;
+        const query = { _id: ObjectId(id) };
+        const tool = await toolsCollection.findOne(query);
+        res.send(tool);
+      });
+  
+      app.get("/items", async (req, res) => {
+        const query = {};
+        const cursor = itemsCollection.find(query);
+        const items = await cursor.toArray();
+        res.send(items);
+      });
+  
+      app.get("/news", async (req, res) => {
+        const query = {};
+        const cursor = newsCollection.find(query);
+        const news = await cursor.toArray();
+        res.send(news);
+      });
+  
+      app.get("/users", verifyJWT, async (req, res) => {
+        const users = await usersCollection.find().toArray();
+        res.send(users);
+      });
+  
+      app.get('/admin/:email', async(req, res) => {
           const email = req.params.email;
           const user = await usersCollection.findOne({email: email});
           const isAdmin = user.role === 'admin';
           res.send({admin: isAdmin});
-      });
-
+      })
+  
       app.get("/bookings", verifyJWT, async (req, res) => {
         const customer = req.query.customer;
         const decodedEmail = req.decoded.email;
@@ -115,122 +122,141 @@ async function run(){
           return res.status(403).send({ message: "forbidden access" });
         }
       });
-
+  
       app.get('/bookings/:id', verifyJWT, async(req, res) =>{
-        const id = req.params.id;
-        const query = {_id: ObjectId(id)};
-        const booking = await bookingsCollection.findOne(query);
-        res.send(booking);
-    });
-
-    app.get('/review', async(req, res) => {
-      const email = req.params.email;
-      const query = email;
-      const cursor = reviewCollection.find(query);
-      const review = await cursor.toArray();
-      res.send(review);
-    });
-
-    app.get('/profile', async(req, res) => {
-      const email = req.params.email;
-      const query = email;
-      const cursor = profileCollection.find(query);
-      const profile = await cursor.toArray();
-      res.send(profile);
-    })
-
-
-      app.post('/tools', verifyJWT, verifyAdmin, async(req, res) => {
-        const newProduct = req.body;
-        const result = await toolsCollection.insertOne(newProduct);
-        res.send(result);
-    });
-
-    app.post("/booking", async (req, res) => {
-      const booking = req.body;
-
-      // const query = { availableQuantity: {$gt: booking.quantity} }
-
-      // const query = {  "$or": [ {"availableQuantity": {$gt: booking.quantity}}, {"minOrderQuantity": {$lt: booking.quantity}} ] }
-
-      // const exists =  bookingsCollection.find(query);
-      // if(exists){
-      //     return res.send({success: false})
-      // }
-      const result = await bookingsCollection.insertOne(booking);
-      res.send(result);
-      // return res.send({success: true, result});
-    });
-
-    app.post('/review', async(req, res) =>{
-      const review = req.body;
-      const result = await reviewCollection.insertOne(review);
-      res.send(result);
-    });
-
-    app.post('/profile', async(req, res) =>{
-      const profile = req.body;
-      const result = await profileCollection.insertOne(profile);
-      res.send(result);
-    });
-
-        app.put("/users/:email", async (req, res) => {
-          const email = req.params.email;
-          const user = req.body;
-          const filter = { email: email };
-          const options = { upsert: true };
-          const updateDoc = {
-            $set: user,
-          };
-          const result = await usersCollection.updateOne(
-            filter,
-            updateDoc,
-            options
-          );
-          const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET);
-          res.send({ result, token });
-        });
-
-        app.put("/users/admin/:email", verifyJWT, async (req, res) => {
-          const email = req.params.email;
-            const filter = { email: email };
-            const updateDoc = {
-              $set: { role: "admin" },
-            };
-            const result = await usersCollection.updateOne(filter, updateDoc);
-            res.send(result);
-        });
-
-        app.patch('/bookings/:id', verifyJWT, async(req, res) =>{
           const id = req.params.id;
-          const payment = req.body;
-          const filter = {_id: ObjectId(id)};
-          const updatedDoc ={
-            $set: {
-              paid: true,
-              transactionId: payment.transactionId
-            }
+          const query = {_id: ObjectId(id)};
+          const booking = await bookingsCollection.findOne(query);
+          res.send(booking);
+      })
+  
+      app.get('/booking', verifyJWT, async(req, res) => {
+        const email = req.params.email;
+        const query = email;
+        const cursor = bookingsCollection.find(query);
+        const allbookings = await cursor.toArray();
+        res.send(allbookings);
+      })
+  
+      app.get('/review', async(req, res) => {
+        const email = req.params.email;
+        const query = email;
+        const cursor = reviewCollection.find(query);
+        const review = await cursor.toArray();
+        res.send(review);
+      })
+  
+      app.get('/profile', verifyJWT, async(req, res) => {
+        const user = req.query.user;
+        const decodedEmail = req.decoded.email;
+        if (user === decodedEmail) {
+          const query = {user: user};
+        const profile = await profileCollection.find(query).toArray();
+        return res.send(profile);
+        } else {
+          return res.status(403).send({ message: "forbidden access" });
+        }
+      })
+  
+      app.post("/booking", async (req, res) => {
+        const booking = req.body;
+        const result = await bookingsCollection.insertOne(booking);
+        res.send(result);
+      });
+  
+      app.post('/tools', verifyJWT, verifyAdmin, async(req, res) => {
+          const newProduct = req.body;
+          const result = await toolsCollection.insertOne(newProduct);
+          res.send(result);
+      })
+  
+      app.post('/review', async(req, res) =>{
+        const review = req.body;
+        const result = await reviewCollection.insertOne(review);
+        res.send(result);
+      });
+  
+      app.post('/profile', async(req, res) =>{
+        const profile = req.body;
+        const result = await profileCollection.insertOne(profile);
+        res.send(result);
+      });
+  
+      app.put("/users/:email", async (req, res) => {
+        const email = req.params.email;
+        const user = req.body;
+        const filter = { email: email };
+        const options = { upsert: true };
+        const updateDoc = {
+          $set: user,
+        };
+        const result = await usersCollection.updateOne(
+          filter,
+          updateDoc,
+          options
+        );
+        const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET);
+        res.send({ result, token });
+      });
+  
+      app.put("/users/admin/:email", verifyJWT, verifyAdmin, async (req, res) => {
+        const email = req.params.email;
+          const filter = { email: email };
+          const updateDoc = {
+            $set: { role: "admin" },
+          };
+          const result = await usersCollection.updateOne(filter, updateDoc);
+          res.send(result);
+      });
+  
+      app.put("/profile/:email", async (req, res) => {
+        const email = req.params.email;
+        const user = req.body;
+        const filter = {email: email}
+        const options = { upsert: true};
+        const updateDoc = {
+          $set: user,
+        };
+        const result = await profileCollection.updateOne(
+          filter,
+          updateDoc,
+          options
+        );
+        res.send(result);
+      });
+  
+      app.patch('/bookings/:id', verifyJWT, async(req, res) =>{
+        const id = req.params.id;
+        const payment = req.body;
+        const filter = {_id: ObjectId(id)};
+        const updatedDoc ={
+          $set: {
+            paid: true,
+            transactionId: payment.transactionId
           }
-          const result = await paymentCollection.insertOne(payment);
-          const updatedBooking = await bookingsCollection.updateOne(filter, updatedDoc);
-          res.send(updatedBooking);
-        })
-
-        app.delete('/tools/:id', verifyJWT, verifyAdmin, async(req, res) => {
+        }
+        const result = await paymentCollection.insertOne(payment);
+        const updatedBooking = await bookingsCollection.updateOne(filter, updatedDoc);
+        res.send(updatedBooking);
+      })
+  
+      app.delete('/tools/:id', verifyJWT, verifyAdmin, async(req, res) => {
           const id = req.params.id;
           const filter = {_id: ObjectId(id)};
           const result = await toolsCollection.deleteOne(filter);
           res.send(result);
       });
   
-    
-      
-
-}
-    finally{
-
+      app.delete('/bookings/:id', verifyJWT, async(req, res) => {
+          const id = req.params.id;
+          const filter = {_id: ObjectId(id)};
+          const result = await bookingsCollection.deleteOne(filter);
+          res.send(result);
+      });
+    } 
+    finally {
     }
-}
+  }
 
 run().catch(console.dir)
 app.get('/', (req, res) => {
